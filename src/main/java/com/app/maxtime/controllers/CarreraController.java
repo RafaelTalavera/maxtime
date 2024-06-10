@@ -37,9 +37,9 @@ public class CarreraController {
         return ResponseEntity.ok(carreras);
     }
 
-    @GetMapping("/organizador/{organizadorId}")
-    public ResponseEntity<List<CarreraResponseDTO>> getCarrerasByOrganizadorId(@PathVariable Long organizadorId) {
-        List<CarreraResponseDTO> carreras = carreraService.findByOrganizadorId(organizadorId);
+    @GetMapping("/organizador/{userId}")
+    public ResponseEntity<List<CarreraResponseDTO>> getCarrerasByOrganizadorId(@PathVariable Long userId) {
+        List<CarreraResponseDTO> carreras = carreraService.findByUserId(userId);
         return ResponseEntity.ok(carreras);
     }
 

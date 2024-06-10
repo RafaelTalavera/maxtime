@@ -8,6 +8,10 @@ import java.util.List;
 
 public interface IDistanciaDao extends CrudRepository<Distancia, Long> {
 
-    @Query("SELECT d FROM Distancia d WHERE d.organizador.id = ?1 AND d.carrera.id = ?2")
-    List<Distancia> findByOrganizadorIdAndCarreraId(Long organizadorId, Long carreraId);
+    @Query("SELECT d FROM Distancia d WHERE d.user.id = ?1 AND d.carrera.id = ?2")
+    List<Distancia> findByUserIdAndCarreraId(Long userId, Long carreraId);
+
+    @Query("SELECT d FROM Distancia d WHERE d.user.username = :username")
+    List<Distancia> findByUserUsername(String username);
+
 }

@@ -3,12 +3,12 @@ package com.app.maxtime.services.serviceimplements;
 import com.app.maxtime.dto.request.CarreraRequestDTO;
 import com.app.maxtime.dto.response.CarreraResponseDTO;
 import com.app.maxtime.dto.response.DistanciaResponseDTO;
-import com.app.maxtime.dto.response.OrganizadorResponseDTO;
+import com.app.maxtime.dto.response.UserResponseDTO;
 import com.app.maxtime.exeption.RegistroNoEncontradoException;
 import com.app.maxtime.models.dao.ICarreraDao;
-import com.app.maxtime.models.dao.IOrganizadorDao;
+import com.app.maxtime.models.dao.IUserDAO;
 import com.app.maxtime.models.entity.Carrera;
-import com.app.maxtime.models.entity.Organizador;
+import com.app.maxtime.models.entity.User;
 import com.app.maxtime.services.ICarreraService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -28,7 +27,7 @@ public class CarreraServiceImplements implements ICarreraService {
     private ICarreraDao carreraDao;
 
     @Autowired
-    private IOrganizadorDao organizadorDao;
+    private IUserDAO userDAO;
 
     @Override
     public List<CarreraResponseDTO> findAll() {
@@ -50,7 +49,7 @@ public class CarreraServiceImplements implements ICarreraService {
         }
 
         // Recuperar el organizador completo desde la base de datos
-        Organizador organizador = organizadorDao.findById(carreraRequestDTO.organizadorId())
+        User user = userDAO.findById(carreraRequestDTO.organizadorId())
                 .orElseThrow(() -> new RegistroNoEncontradoException("Organizador no encontrado"));
 
         Carrera carrera = new Carrera(
@@ -66,7 +65,7 @@ public class CarreraServiceImplements implements ICarreraService {
                 carreraRequestDTO.contacto(),
                 carreraRequestDTO.horario(),
                 carreraRequestDTO.estado(),
-                organizador,
+                user,
                 new ArrayList<>()  // Inicializamos la lista de distancias vacía
         );
 
@@ -81,18 +80,20 @@ public class CarreraServiceImplements implements ICarreraService {
                         distancia.getValor(),
                         distancia.getLinkDePago(),
                         distancia.getCarrera().getId(),
-                        distancia.getOrganizador().getId()// Añadir el ID de la carrera
+                        distancia.getUser().getId()// Añadir el ID de la carrera
                 ))
                 .collect(Collectors.toList())
                 : new ArrayList<>();
 
-        OrganizadorResponseDTO organizadorResponse = new OrganizadorResponseDTO(
-                savedCarrera.getOrganizador().getId(),
-                savedCarrera.getOrganizador().getNombre(),
-                savedCarrera.getOrganizador().getApellido(),
-                savedCarrera.getOrganizador().getDni(),
-                savedCarrera.getOrganizador().getEmail(),
-                savedCarrera.getOrganizador().getTelefono()
+        UserResponseDTO organizadorResponse = new UserResponseDTO(
+                savedCarrera.getUser().getId(),
+                savedCarrera.getUser().getUsername(),
+                savedCarrera.getUser().getApellido(),
+                savedCarrera.getUser().getDni(),
+                savedCarrera.getUser().getPassword(),
+                savedCarrera.getUser().getNombre(),
+                savedCarrera.getUser().getTelefono(),
+                savedCarrera.getUser().getRole()
         );
 
         return new CarreraResponseDTO(
@@ -142,9 +143,9 @@ public class CarreraServiceImplements implements ICarreraService {
     }
 
     @Override
-    public List<CarreraResponseDTO> findByOrganizadorId(Long organizadorId) {
+    public List<CarreraResponseDTO> findByUserId(Long userId) {
         // Buscar las carreras asociadas al organizador con el ID proporcionado
-        List<Carrera> carreras = carreraDao.findByOrganizadorId(organizadorId);
+        List<Carrera> carreras = carreraDao.findByUserId(userId);
 
         // Convertir las carreras encontradas a sus DTOs correspondientes
         return carreras.stream()
@@ -160,17 +161,18 @@ public class CarreraServiceImplements implements ICarreraService {
 
 
     private CarreraResponseDTO convertToDo(Carrera carrera) {
-        // Convertir el organizador a su DTO correspondiente
-        OrganizadorResponseDTO organizadorResponse = new OrganizadorResponseDTO(
-                carrera.getOrganizador().getId(),
-                carrera.getOrganizador().getNombre(),
-                carrera.getOrganizador().getApellido(),
-                carrera.getOrganizador().getDni(),
-                carrera.getOrganizador().getEmail(),
-                carrera.getOrganizador().getTelefono()
+        User user = carrera.getUser();
+        UserResponseDTO userResponseDTO = new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getApellido(),
+                user.getDni(),
+                user.getPassword(),
+                user.getNombre(),
+                user.getTelefono(),
+                user.getRole()
         );
 
-        // Convertir las distancias a sus DTOs correspondientes
         List<DistanciaResponseDTO> distanciasResponse = carrera.getDistancias().stream()
                 .map(distancia -> new DistanciaResponseDTO(
                         distancia.getId(),
@@ -178,10 +180,9 @@ public class CarreraServiceImplements implements ICarreraService {
                         distancia.getValor(),
                         distancia.getLinkDePago(),
                         distancia.getCarrera().getId(),
-                        distancia.getOrganizador().getId())) // Incluir el ID de la carrera
+                        distancia.getUser().getId()))
                 .collect(Collectors.toList());
 
-        // Retornar el CarreraResponseDTO completo
         return new CarreraResponseDTO(
                 carrera.getId(),
                 carrera.getNombre(),
@@ -195,9 +196,8 @@ public class CarreraServiceImplements implements ICarreraService {
                 carrera.getContacto(),
                 carrera.getHorario(),
                 carrera.getEstado(),
-                organizadorResponse,
+                userResponseDTO,
                 distanciasResponse
         );
     }
-
 }

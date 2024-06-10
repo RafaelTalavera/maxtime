@@ -20,7 +20,7 @@ public interface ICarreraService {
 
     public void deleteById(Long id);
 
-    List<CarreraResponseDTO> findByOrganizadorId(Long organizadorId);
+    List<CarreraResponseDTO> findByUserId(Long userId);
 
     List<CarreraResponseDTO> findActiveCarreras();
 

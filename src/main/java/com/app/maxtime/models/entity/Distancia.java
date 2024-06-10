@@ -31,8 +31,8 @@ public class Distancia implements Serializable {
     private Carrera carrera;
 
     @ManyToOne
-    @JoinColumn(name = "organizador_id", nullable = false)
-    private Organizador organizador;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     @OneToMany(mappedBy = "distancia", cascade = CascadeType.ALL)
     private List<Corredor> corredores;

@@ -32,7 +32,7 @@ public class Corredor implements Serializable {
     private String telefono;
     private String email;
     private String team;
-    private Boolean confirmado;
+    private boolean confirmado;
     private String grupoSanguinio;
 
     @ManyToOne

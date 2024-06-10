@@ -15,7 +15,7 @@ public record CorredorResponseDTO(
         String email,
         String team,
         String grupoSanguinio,
-        Boolean confirmado,
+        boolean confirmado,
         CarreraResponseDTO carrera,
         DistanciaResponseDTO distancia
 ) {

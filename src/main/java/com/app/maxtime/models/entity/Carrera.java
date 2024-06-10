@@ -2,18 +2,15 @@ package com.app.maxtime.models.entity;
 
 import com.app.maxtime.dto.response.CarreraResponseDTO;
 import com.app.maxtime.dto.response.DistanciaResponseDTO;
-import com.app.maxtime.dto.response.OrganizadorResponseDTO;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.app.maxtime.dto.response.UserResponseDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,8 +41,8 @@ public class Carrera implements Serializable {
     private Boolean estado;
 
     @ManyToOne
-    @JoinColumn(name = "organizador_id")
-    private Organizador organizador;
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @OneToMany(mappedBy = "carrera", cascade = CascadeType.ALL)
     private List<Distancia> distancias;
@@ -55,13 +52,16 @@ public class Carrera implements Serializable {
 
     // Constructor to convert to CarreraResponseDTO
     public CarreraResponseDTO toResponseDTO() {
-        OrganizadorResponseDTO organizadorResponse = new OrganizadorResponseDTO(
-                organizador.getId(),
-                organizador.getNombre(),
-                organizador.getApellido(),
-                organizador.getDni(),
-                organizador.getEmail(),
-                organizador.getTelefono()
+        UserResponseDTO userResponseDTO = new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getApellido(),
+                user.getDni(),
+                user.getPassword(),
+                user.getNombre(),
+                user.getTelefono(),
+                user.getRole()
+
         );
 
         List<DistanciaResponseDTO> distanciasResponse = distancias.stream()
@@ -71,7 +71,7 @@ public class Carrera implements Serializable {
                         distancia.getValor(),
                         distancia.getLinkDePago(),
                         distancia.getCarrera().id,
-                        distancia.getOrganizador().getId())) // Incluir el ID de la carrera
+                        distancia.getUser().getId())) // Incluir el ID de la carrera
                 .collect(Collectors.toList());
 
         return new CarreraResponseDTO(
@@ -87,7 +87,7 @@ public class Carrera implements Serializable {
                 contacto,
                 horario,
                 estado,
-                organizadorResponse,
+                userResponseDTO,
                 distanciasResponse
         );
     }

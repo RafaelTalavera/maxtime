@@ -50,7 +50,7 @@ public class DistanciaController {
     @GetMapping("/organizador/{organizadorId}/carrera/{carreraId}")
     public ResponseEntity<List<DistanciaResponseDTO>> findByOrganizadorIdAndCarreraId(
             @PathVariable Long organizadorId, @PathVariable Long carreraId) {
-        List<DistanciaResponseDTO> distancias = distanciaService.findByOrganizadorIdAndCarreraId(organizadorId, carreraId);
+        List<DistanciaResponseDTO> distancias = distanciaService.findByUserIdAndCarreraId(organizadorId, carreraId);
         return ResponseEntity.ok(distancias);
     }
 }

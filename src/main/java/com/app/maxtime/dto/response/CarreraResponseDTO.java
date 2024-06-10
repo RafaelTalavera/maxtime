@@ -22,7 +22,7 @@ public record CarreraResponseDTO(
         String contacto,
         String horario,
         Boolean estado,
-        OrganizadorResponseDTO organizador,
+        UserResponseDTO user,
         List<DistanciaResponseDTO> distancias
 ) {
 }

@@ -21,5 +21,5 @@ public interface IDistanciaService {
 
     Optional<Distancia> findById(Long id) ;
 
-    List<DistanciaResponseDTO> findByOrganizadorIdAndCarreraId(Long organizadorId, Long distanciaId);
+    List<DistanciaResponseDTO> findByUserIdAndCarreraId(Long organizadorId, Long distanciaId);
 }

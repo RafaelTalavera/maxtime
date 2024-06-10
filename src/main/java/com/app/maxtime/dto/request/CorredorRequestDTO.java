@@ -14,7 +14,7 @@ public record CorredorRequestDTO(
         String email,
         String team,
         String grupoSanguinio,
-        Boolean confirmado,
+        boolean confirmado,
         Long carreraId,
         Long distanciaId
 ) {

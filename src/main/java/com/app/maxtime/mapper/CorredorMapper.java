@@ -3,11 +3,11 @@ package com.app.maxtime.mapper;
 import com.app.maxtime.dto.response.CarreraResponseDTO;
 import com.app.maxtime.dto.response.CorredorResponseDTO;
 import com.app.maxtime.dto.response.DistanciaResponseDTO;
-import com.app.maxtime.dto.response.OrganizadorResponseDTO;
+import com.app.maxtime.dto.response.UserResponseDTO;
 import com.app.maxtime.models.entity.Corredor;
 import com.app.maxtime.models.entity.Carrera;
 import com.app.maxtime.models.entity.Distancia;
-import com.app.maxtime.models.entity.Organizador;
+import com.app.maxtime.models.entity.User;
 
 public class CorredorMapper {
 
@@ -27,7 +27,7 @@ public class CorredorMapper {
                 corredor.getEmail(),
                 corredor.getTeam(),
                 corredor.getGrupoSanguinio(),
-                corredor.getConfirmado(),
+                corredor.isConfirmado(),
                 carreraToDTO(corredor.getCarrera()),
                 distanciaToDTO(corredor.getDistancia())
         );
@@ -38,7 +38,7 @@ public class CorredorMapper {
         if (carrera == null) {
             return null;
         }
-        OrganizadorResponseDTO organizadorDTO = organizadorToDTO(carrera.getOrganizador());
+        UserResponseDTO organizadorDTO = userToDTO(carrera.getUser());
         return new CarreraResponseDTO(
                 carrera.getId(),
                 carrera.getNombre(),
@@ -68,23 +68,25 @@ public class CorredorMapper {
                 distancia.getValor(),
                 distancia.getLinkDePago(),
                 distancia.getCarrera().getId(),
-                distancia.getOrganizador().getId()
+                distancia.getUser().getId()
         );
     }
 
     // Método para convertir la entidad Organizador a su DTO correspondiente
-    private static OrganizadorResponseDTO organizadorToDTO(Organizador organizador) {
-        if (organizador == null) {
+    private static UserResponseDTO userToDTO(User user) {
+        if (user == null) {
             return null;
         }
         // Lógica para mapear la entidad Organizador a su DTO OrganizadorResponseDTO
-        return new OrganizadorResponseDTO(
-                organizador.getId(),
-                organizador.getNombre(),
-                organizador.getDni(),
-                organizador.getEmail(),
-                organizador.getTelefono(),
-                organizador.getTelefono()
+        return new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getDni(),
+                user.getNombre(),
+                user.getTelefono(),
+                user.getTelefono(),
+                user.getPassword(),
+                user.getRole()
 
                 // Incluir más atributos si es necesario
         );

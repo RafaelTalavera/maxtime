@@ -11,7 +11,9 @@ import com.app.maxtime.models.entity.Distancia;
 import com.app.maxtime.services.ICarreraService;
 import com.app.maxtime.services.ICorredorService;
 import com.app.maxtime.services.IDistanciaService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,20 +34,33 @@ public class CorredorController {
     @Autowired
     private ICarreraService carreraService;
 
+
+    @GetMapping("/usuario")
+    public ResponseEntity<List<CorredorResponseDTO>> getCorredoresByUserEmail(HttpServletRequest request) {
+
+        try {
+        String token = request.getHeader("Authorization");
+        String email = corredorService.extractUserEmailFromToken(token);
+        List<Corredor> corredores = corredorService.getCorredoresByEmail(email);
+        List<CorredorResponseDTO> corredoresResponse = convertToCorredorResponseDTO(corredores);
+        return ResponseEntity.ok(corredoresResponse);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
     @GetMapping("/carrera/{dni}")
     public ResponseEntity<List<CorredorResponseDTO>> getCorredoresByCarreraId(@PathVariable String dni) {
         List<Corredor> corredores = corredorService.findByDni(dni);
-        // Convierte los Corredores en CorredorResponseDTO
         List<CorredorResponseDTO> corredoresResponse = convertToCorredorResponseDTO(corredores);
         return ResponseEntity.ok(corredoresResponse);
     }
 
     @PostMapping
     public ResponseEntity<CorredorResponseDTO> createCorredor(@RequestBody CorredorRequestDTO corredorRequestDTO) {
-        // Crear un nuevo corredor
-        Corredor corredor = new Corredor();
 
-        // Establecer los atributos del corredor desde el DTO
+        Corredor corredor = new Corredor();
         corredor.setNombre(corredorRequestDTO.nombre());
         corredor.setApellido(corredorRequestDTO.apellido());
         corredor.setDni(corredorRequestDTO.dni());
@@ -60,22 +75,28 @@ public class CorredorController {
         corredor.setTeam(corredorRequestDTO.team());
         corredor.setGrupoSanguinio(corredorRequestDTO.grupoSanguinio());
 
-        // Obtener la carrera y la distancia de la base de datos utilizando los ID proporcionados en el DTO
+        Boolean confirmado = corredorRequestDTO.confirmado();
+        corredor.setConfirmado(confirmado != null ? confirmado : false);
+
         Carrera carrera = carreraService.findById(corredorRequestDTO.carreraId())
                 .orElseThrow(() -> new RuntimeException("No se encontró la carrera con el ID: " + corredorRequestDTO.carreraId()));
 
         Distancia distancia = distanciaService.findById(corredorRequestDTO.distanciaId())
                 .orElseThrow(() -> new RuntimeException("No se encontró la distancia con el ID: " + corredorRequestDTO.distanciaId()));
 
-        // Asignar la carrera y la distancia al corredor
         corredor.setCarrera(carrera);
         corredor.setDistancia(distancia);
 
-        // Guardar el corredor en la base de datos
         Corredor savedCorredor = corredorService.save(corredor);
 
-        // Convertir el corredor guardado a DTO y devolverlo en el ResponseEntity
         CorredorResponseDTO corredorResponseDTO = CorredorMapper.toDTO(savedCorredor);
+        return ResponseEntity.ok(corredorResponseDTO);
+    }
+
+    @PutMapping("/{corredorId}/confirmado")
+    public ResponseEntity<CorredorResponseDTO> updateConfirmado(@PathVariable Long corredorId) {
+        Corredor corredor = corredorService.updateConfirmado(corredorId);
+        CorredorResponseDTO corredorResponseDTO = CorredorMapper.toDTO(corredor);
         return ResponseEntity.ok(corredorResponseDTO);
     }
 
@@ -83,21 +104,17 @@ public class CorredorController {
         return corredores.stream().map(this::mapToCorredorResponseDTO).collect(Collectors.toList());
     }
     private CorredorResponseDTO mapToCorredorResponseDTO(Corredor corredor) {
-        // Obtener la carrera y la distancia asociadas al corredor
         Carrera carrera = corredor.getCarrera();
         Distancia distancia = corredor.getDistancia();
 
-        // Crear CarreraResponseDTO con solo el ID y el nombre
         CarreraResponseDTO carreraResponseDTO = new CarreraResponseDTO(carrera.getId(), carrera.getNombre(),
                 carrera.getFecha(), carrera.getFechaDeCierreDeInscripcion(), carrera.getLocalidad(), carrera.getProvincia(),
                 carrera.getPais(), carrera.getImagen(), carrera.getDetalles(), carrera.getContacto(), carrera.getHorario(),
                 carrera.getEstado(), null, null);
 
-        // Crear DistanciaResponseDTO con solo el ID y el tipo
         DistanciaResponseDTO distanciaResponseDTO = new DistanciaResponseDTO(distancia.getId(), distancia.getTipo(),
                 distancia.getValor(), distancia.getLinkDePago(), null, null);
 
-        // Crear CorredorResponseDTO
         return new CorredorResponseDTO(
                 corredor.getId(),
                 corredor.getNombre(),
@@ -113,7 +130,7 @@ public class CorredorController {
                 corredor.getEmail(),
                 corredor.getTeam(),
                 corredor.getGrupoSanguinio(),
-                corredor.getConfirmado(),
+                corredor.isConfirmado(),
                 carreraResponseDTO,
                 distanciaResponseDTO
         );

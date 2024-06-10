@@ -5,11 +5,11 @@ import com.app.maxtime.dto.response.DistanciaResponseDTO;
 import com.app.maxtime.exeption.RegistroNoEncontradoException;
 import com.app.maxtime.models.dao.IDistanciaDao;
 import com.app.maxtime.models.dao.ICarreraDao;
-import com.app.maxtime.models.dao.IOrganizadorDao;
+import com.app.maxtime.models.dao.IUserDAO;
 import com.app.maxtime.models.entity.Carrera;
 import com.app.maxtime.models.entity.Distancia;
 
-import com.app.maxtime.models.entity.Organizador;
+import com.app.maxtime.models.entity.User;
 import com.app.maxtime.services.IDistanciaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class DistanciaServiceImplements implements IDistanciaService {
     private ICarreraDao carreraDao;
 
     @Autowired
-    private IOrganizadorDao organizadorDao;
+    private IUserDAO userDao;
 
     @Override
     public List<DistanciaResponseDTO> getAllDistancias() {
@@ -56,7 +56,7 @@ public class DistanciaServiceImplements implements IDistanciaService {
         Carrera carrera = carreraDao.findById(distanciaRequestDTO.carreraId())
                 .orElseThrow(() -> new RegistroNoEncontradoException("Carrera no encontrada con el ID: " + distanciaRequestDTO.carreraId()));
 
-        Organizador organizador = organizadorDao.findById(distanciaRequestDTO.organizadorId())
+        User user = userDao.findById(distanciaRequestDTO.organizadorId())
                 .orElseThrow(() -> new RegistroNoEncontradoException("Organizador no encontrado con el ID: " + distanciaRequestDTO.organizadorId()));
 
         Distancia nuevaDistancia = new Distancia(
@@ -65,7 +65,7 @@ public class DistanciaServiceImplements implements IDistanciaService {
                 distanciaRequestDTO.valor(),
                 distanciaRequestDTO.linkDePago(),
                 carrera,
-                organizador,  // Establecer el organizador aquí
+                user,  // Establecer el organizador aquí
                 new ArrayList<>() // Lista de corredores vacía por defecto
         );
 
@@ -102,8 +102,8 @@ public class DistanciaServiceImplements implements IDistanciaService {
     }
 
     @Override
-    public List<DistanciaResponseDTO> findByOrganizadorIdAndCarreraId(Long organizadorId, Long carreraId) {
-        List<Distancia> distancias = distanciaDao.findByOrganizadorIdAndCarreraId(organizadorId, carreraId);
+    public List<DistanciaResponseDTO> findByUserIdAndCarreraId(Long userId, Long carreraId) {
+        List<Distancia> distancias = distanciaDao.findByUserIdAndCarreraId(userId, carreraId);
         return distancias.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
@@ -118,8 +118,8 @@ public class DistanciaServiceImplements implements IDistanciaService {
                 distancia.getValor(),
                 distancia.getLinkDePago(),
                 distancia.getCarrera().getId(),
-                distancia.getOrganizador().getId()
+                distancia.getUser().getId());
 
-        );
+
     }
 }

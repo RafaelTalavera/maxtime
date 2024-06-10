@@ -20,4 +20,10 @@ public interface ICorredorService {
     public List<Corredor> findByCarreraId(Long carreraResponse);
 
     List<Corredor> findByDni(String dni);
+
+    List<Corredor> getCorredoresByEmail(String email);
+
+  String extractUserEmailFromToken(String token);
+
+    Corredor updateConfirmado(Long corredorId);
 }

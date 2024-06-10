@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ICarreraDao extends CrudRepository<Carrera, Long> {
 
-    List<Carrera> findByOrganizadorId(Long organizadorId);
+    List<Carrera> findByUserId(Long userId);
 
     List<Carrera> findByEstadoTrue();
 }
