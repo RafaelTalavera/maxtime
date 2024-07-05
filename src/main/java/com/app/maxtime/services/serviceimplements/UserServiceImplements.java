@@ -108,5 +108,19 @@ public class UserServiceImplements implements IUserService {
         }
     }
 
+    @Override
+    public Long extractUserIdFromToken(String token) {
+        try {
+            // Remover la palabra "Bearer " del inicio del token
+            String jwtToken = token.replace("Bearer ", "");
+            Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(jwtToken).getBody();
+            Long userId = claims.get("userId", Long.class);
+            System.out.println("User ID extraído del token: " + userId); // Imprimir el userId extraído del token
+            return userId;
+        } catch (Exception e) {
+            throw new RuntimeException("Error al extraer el user ID del token", e);
+        }
+    }
+
 
 }

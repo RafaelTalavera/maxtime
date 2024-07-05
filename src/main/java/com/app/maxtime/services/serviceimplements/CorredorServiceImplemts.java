@@ -40,12 +40,20 @@ public class CorredorServiceImplemts implements ICorredorService {
 
     @Override
     public Corredor save(Corredor corredor) {
+        System.out.println("Buscando corredor por DNI y carrera...");
+        Optional<Corredor> existingCorredor = corredorDAO.findByDniAndCarreraId(corredor.getDni(), corredor.getCarrera().getId());
+        if (existingCorredor.isPresent()) {
+            System.out.println("Corredor con DNI " + corredor.getDni() + " ya está registrado en la carrera con ID " + corredor.getCarrera().getId());
+            throw new IllegalArgumentException("El corredor con ese DNI ya está registrado en esta carrera");
+        }
+        System.out.println("Guardando nuevo corredor...");
         return corredorDAO.save(corredor);
     }
 
+
     @Override
     public void deleteById(Long id) {
-                Corredor existCorredor = corredorDAO.findById(id).orElseThrow(()
+        Corredor existCorredor = corredorDAO.findById(id).orElseThrow(()
                 -> new RuntimeException("No se encontró ningún registro con el ID: " + id));
         corredorDAO.deleteById(id);
 
@@ -95,5 +103,8 @@ public class CorredorServiceImplemts implements ICorredorService {
 
         return corredorDAO.save(corredor); // Guarda los cambios en la base de datos y devuelve el corredor actualizado
     }
+
 }
+
+
 

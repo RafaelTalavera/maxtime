@@ -23,4 +23,7 @@ public interface IUserService {
     boolean existsByUsername(String username);
 
     public String extractUserEmailFromToken(String token);
+
+    public Long extractUserIdFromToken(String token);
+
 }

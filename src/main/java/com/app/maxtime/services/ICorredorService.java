@@ -23,7 +23,9 @@ public interface ICorredorService {
 
     List<Corredor> getCorredoresByEmail(String email);
 
-  String extractUserEmailFromToken(String token);
+    String extractUserEmailFromToken(String token);
 
     Corredor updateConfirmado(Long corredorId);
+
+
 }

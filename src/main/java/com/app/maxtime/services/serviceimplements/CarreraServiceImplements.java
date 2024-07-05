@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +31,8 @@ public class CarreraServiceImplements implements ICarreraService {
 
     @Autowired
     private IUserDAO userDAO;
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
     public List<CarreraResponseDTO> findAll() {
@@ -44,6 +49,13 @@ public class CarreraServiceImplements implements ICarreraService {
     @Override
     @Transactional
     public CarreraResponseDTO createCarrera(CarreraRequestDTO carreraRequestDTO) {
+
+        Date fecha = null;
+        try {
+            fecha = dateFormat.parse(dateFormat.format(carreraRequestDTO.fecha()));
+        } catch (ParseException e) {
+            e.printStackTrace(); // Manejar el error según tu caso
+        }
         if (carreraRequestDTO == null) {
             throw new IllegalArgumentException("El objeto CarreraRequestDTO no puede ser nulo");
         }
@@ -144,17 +156,14 @@ public class CarreraServiceImplements implements ICarreraService {
 
     @Override
     public List<CarreraResponseDTO> findByUserId(Long userId) {
-        // Buscar las carreras asociadas al organizador con el ID proporcionado
         List<Carrera> carreras = carreraDao.findByUserId(userId);
-
-        // Convertir las carreras encontradas a sus DTOs correspondientes
         return carreras.stream()
                 .map(this::convertToDo)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<CarreraResponseDTO> findActiveCarreras() {  // Nuevo método para obtener carreras activas
+    public List<CarreraResponseDTO> findActiveCarreras() {
         List<Carrera> carreras = carreraDao.findByEstadoTrue();
         return carreras.stream().map(this::convertToDo).collect(Collectors.toList());
     }

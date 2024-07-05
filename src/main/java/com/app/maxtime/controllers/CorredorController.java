@@ -5,6 +5,7 @@ import com.app.maxtime.dto.response.CarreraResponseDTO;
 import com.app.maxtime.dto.response.CorredorResponseDTO;
 import com.app.maxtime.dto.response.DistanciaResponseDTO;
 import com.app.maxtime.mapper.CorredorMapper;
+import com.app.maxtime.models.dao.ICorredorDAO;
 import com.app.maxtime.models.entity.Carrera;
 import com.app.maxtime.models.entity.Corredor;
 import com.app.maxtime.models.entity.Distancia;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/corredores")
@@ -29,6 +31,9 @@ public class CorredorController {
     private ICorredorService corredorService;
 
     @Autowired
+    private ICorredorDAO iCorredorDAO;
+
+    @Autowired
     private IDistanciaService distanciaService;
 
     @Autowired
@@ -36,7 +41,8 @@ public class CorredorController {
 
 
     @GetMapping("/usuario")
-    public ResponseEntity<List<CorredorResponseDTO>> getCorredoresByUserEmail(HttpServletRequest request) {
+    public ResponseEntity<List<CorredorResponseDTO>>
+    getCorredoresByUserEmail(HttpServletRequest request) {
 
         try {
         String token = request.getHeader("Authorization");
@@ -49,8 +55,15 @@ public class CorredorController {
         }
     }
 
+    @GetMapping("/carrera/{carreraId}")
+    public ResponseEntity<List<CorredorResponseDTO>> getCorredoresByCarreraId(@PathVariable Long carreraId) {
+        List<Corredor> corredores = corredorService.findByCarreraId(carreraId);
+        List<CorredorResponseDTO> corredoresResponse = convertToCorredorResponseDTO(corredores);
+        return ResponseEntity.ok(corredoresResponse);
+    }
 
-    @GetMapping("/carrera/{dni}")
+
+    @GetMapping("/carrera/inscripto/{dni}")
     public ResponseEntity<List<CorredorResponseDTO>> getCorredoresByCarreraId(@PathVariable String dni) {
         List<Corredor> corredores = corredorService.findByDni(dni);
         List<CorredorResponseDTO> corredoresResponse = convertToCorredorResponseDTO(corredores);
@@ -58,39 +71,52 @@ public class CorredorController {
     }
 
     @PostMapping
-    public ResponseEntity<CorredorResponseDTO> createCorredor(@RequestBody CorredorRequestDTO corredorRequestDTO) {
+    public ResponseEntity<?> createCorredor(@RequestBody CorredorRequestDTO corredorRequestDTO) {
+        try {
+            System.out.println("Iniciando el proceso de creación de corredor...");
 
-        Corredor corredor = new Corredor();
-        corredor.setNombre(corredorRequestDTO.nombre());
-        corredor.setApellido(corredorRequestDTO.apellido());
-        corredor.setDni(corredorRequestDTO.dni());
-        corredor.setFechaNacimiento(corredorRequestDTO.fechaNacimiento());
-        corredor.setGenero(corredorRequestDTO.genero());
-        corredor.setNacionalidad(corredorRequestDTO.nacionalidad());
-        corredor.setProvincia(corredorRequestDTO.provincia());
-        corredor.setLocalidad(corredorRequestDTO.localidad());
-        corredor.setTalle(corredorRequestDTO.talle());
-        corredor.setTelefono(corredorRequestDTO.telefono());
-        corredor.setEmail(corredorRequestDTO.email());
-        corredor.setTeam(corredorRequestDTO.team());
-        corredor.setGrupoSanguinio(corredorRequestDTO.grupoSanguinio());
+            Corredor corredor = new Corredor();
+            corredor.setNombre(corredorRequestDTO.nombre());
+            corredor.setApellido(corredorRequestDTO.apellido());
+            corredor.setDni(corredorRequestDTO.dni());
+            corredor.setFechaNacimiento(corredorRequestDTO.fechaNacimiento());
+            corredor.setGenero(corredorRequestDTO.genero());
+            corredor.setNacionalidad(corredorRequestDTO.nacionalidad());
+            corredor.setProvincia(corredorRequestDTO.provincia());
+            corredor.setLocalidad(corredorRequestDTO.localidad());
+            corredor.setTalle(corredorRequestDTO.talle());
+            corredor.setTelefono(corredorRequestDTO.telefono());
+            corredor.setEmail(corredorRequestDTO.email());
+            corredor.setTeam(corredorRequestDTO.team());
+            corredor.setGrupoSanguinio(corredorRequestDTO.grupoSanguinio());
 
-        Boolean confirmado = corredorRequestDTO.confirmado();
-        corredor.setConfirmado(confirmado != null ? confirmado : false);
+            Boolean confirmado = corredorRequestDTO.confirmado();
+            corredor.setConfirmado(confirmado != null ? confirmado : false);
 
-        Carrera carrera = carreraService.findById(corredorRequestDTO.carreraId())
-                .orElseThrow(() -> new RuntimeException("No se encontró la carrera con el ID: " + corredorRequestDTO.carreraId()));
+            System.out.println("Buscando la carrera con ID: " + corredorRequestDTO.carreraId());
+            Carrera carrera = carreraService.findById(corredorRequestDTO.carreraId())
+                    .orElseThrow(() -> new RuntimeException("No se encontró la carrera con el ID: " + corredorRequestDTO.carreraId()));
 
-        Distancia distancia = distanciaService.findById(corredorRequestDTO.distanciaId())
-                .orElseThrow(() -> new RuntimeException("No se encontró la distancia con el ID: " + corredorRequestDTO.distanciaId()));
+            System.out.println("Buscando la distancia con ID: " + corredorRequestDTO.distanciaId());
+            Distancia distancia = distanciaService.findById(corredorRequestDTO.distanciaId())
+                    .orElseThrow(() -> new RuntimeException("No se encontró la distancia con el ID: " + corredorRequestDTO.distanciaId()));
 
-        corredor.setCarrera(carrera);
-        corredor.setDistancia(distancia);
+            corredor.setCarrera(carrera);
+            corredor.setDistancia(distancia);
 
-        Corredor savedCorredor = corredorService.save(corredor);
+            System.out.println("Verificando si el corredor con DNI " + corredor.getDni() + " ya está registrado en la carrera con ID " + carrera.getId());
+            Corredor savedCorredor = corredorService.save(corredor);
 
-        CorredorResponseDTO corredorResponseDTO = CorredorMapper.toDTO(savedCorredor);
-        return ResponseEntity.ok(corredorResponseDTO);
+            System.out.println("Corredor creado exitosamente");
+            CorredorResponseDTO corredorResponseDTO = CorredorMapper.toDTO(savedCorredor);
+            return ResponseEntity.ok(corredorResponseDTO);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: El corredor con ese DNI ya está registrado en esta carrera");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El corredor con ese DNI ya está registrado en esta carrera");
+        } catch (Exception e) {
+            System.out.println("Error inesperado: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error inesperado: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{corredorId}/confirmado")
