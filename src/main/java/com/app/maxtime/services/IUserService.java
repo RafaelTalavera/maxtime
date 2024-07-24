@@ -26,4 +26,6 @@ public interface IUserService {
 
     public Long extractUserIdFromToken(String token);
 
+    public List<UserResponseDTO> findAllNonAdmin();
+
 }

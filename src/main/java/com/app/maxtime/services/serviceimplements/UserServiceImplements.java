@@ -8,6 +8,7 @@ import com.app.maxtime.dto.response.UserResponseDTO;
 import com.app.maxtime.exeption.RegistroNoEncontradoException;
 import com.app.maxtime.models.dao.IUserDAO;
 import com.app.maxtime.models.entity.User;
+import com.app.maxtime.models.entity.security.Role;
 import com.app.maxtime.services.IUserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -85,6 +86,15 @@ public class UserServiceImplements implements IUserService {
 
         // Crea un objeto UserResponseDTO a partir del usuario actualizado y devuélvelo
         return new UserResponseDTO(updatedUser);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> findAllNonAdmin() {
+        Iterable<User> users = userDao.findAll();
+        return StreamSupport.stream(users.spliterator(), false)
+                .filter(user -> !user.getRole().equals(Role.ADMINISTRATOR))
+                .map(UserResponseDTO::new)
+                .collect(Collectors.toList());
     }
 
 

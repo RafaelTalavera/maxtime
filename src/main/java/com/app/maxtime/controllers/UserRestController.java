@@ -92,7 +92,7 @@ public class UserRestController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-            List<UserResponseDTO> organizadores = service.findAll();
+            List<UserResponseDTO> organizadores = service.findAllNonAdmin();
             return ResponseEntity.ok(organizadores);
         } catch (Exception e) {
             System.out.println("Error al procesar la solicitud: " + e.getMessage()); // Imprimir mensaje de error

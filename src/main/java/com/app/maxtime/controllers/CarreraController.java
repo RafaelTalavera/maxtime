@@ -57,15 +57,15 @@ public class CarreraController {
         return ResponseEntity.ok(carreras);
     }
 
-    @GetMapping("/organizador")
-    public ResponseEntity<List<CarreraResponseDTO>> getCarrerasByUserId(
+    @GetMapping("/organizador/{id}")
+    public ResponseEntity<List<CarreraResponseDTO>> getCarrerasByUserId(@PathVariable Long id,
                                                                         HttpServletRequest request) {
 
         try {
             String token = request.getHeader("Authorization").replace("Bearer ", "");
             Long userId = userService.extractUserIdFromToken(token);
 
-            List<CarreraResponseDTO> carreras = carreraService.findByUserId(userId);
+            List<CarreraResponseDTO> carreras = carreraService.findByUserId(id);
             if (carreras.isEmpty()) {
                 return ResponseEntity.noContent().build();
             }
@@ -74,6 +74,12 @@ public class CarreraController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    @GetMapping("/organizadores/{userId}")
+    public ResponseEntity<List<CarreraResponseDTO>> getCarrerasByOrganizadorId(@PathVariable Long userId) {
+        List<CarreraResponseDTO> carreras = carreraService.findByUserId(userId);
+        return ResponseEntity.ok(carreras);
     }
 
     @PutMapping("/{id}")
